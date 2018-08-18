@@ -1,0 +1,35 @@
+.Sidebar {
+    background-color: #394b59;
+    border-right: 1px solid rgba(16, 22, 26, 0.6);
+    padding: 20px;
+    flex: 1;
+}
+
+.Sidebar .bp3-form-group {
+    display: flex;
+}
+
+.Sidebar .bp3-label {
+    width: 20px;
+}
+.Sidebar .bp3-form-content {
+    flex: 1;
+    display: flex;
+}
+
+.Sidebar .bp3-form-content .bp3-input-group {
+    width: 80px;
+    margin-left: 20px;
+}
+
+.Sidebar .bp3-form-content .bp3-input-group input {
+    text-align: center;
+}
+
+.Sidebar .resetButton {
+    text-align: right;
+}
+
+.Sidebar .resetButton button {
+    outline: none;
+}
