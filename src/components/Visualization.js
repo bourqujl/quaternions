@@ -3,6 +3,7 @@
 import React, {Component} from 'react'
 import {autorun} from 'mobx'
 import {ResizeSensor} from '@blueprintjs/core'
+import {ringHighlightGeometry} from '../utilities/geometry'
 import shuttle from '../resources/shuttle.obj'
 import './Visualization.css'
 
@@ -77,9 +78,13 @@ export default class Visualization extends Component {
         axes.forEach((a) => {object.add(a)})
 
         // Generate protractor rings
-        let rings = this.generateProtractorRings(boundingSphere)
-        rings.forEach((r) => {this.scene.add(r)})
+        this.rings = this.generateProtractorRings(boundingSphere)
+        this.rings.forEach((r) => {this.scene.add(r)})
 
+        // Generate ring highlights
+        this.ringHighlights = this.generateProtractorRingHighlights(this.rings)
+        this.ringHighlights.forEach((r) => {this.scene.add(r)})
+        
         // Add the object and render the scene
         this.object = object
         this.scene.add(object)
@@ -91,6 +96,7 @@ export default class Visualization extends Component {
             const y = this.props.rotationState.yRad
             const z = this.props.rotationState.zRad
             this.updateObjectRotation(x, y, z)
+            this.updateRingHighlights(x, y, z)
         })
     }
 
@@ -98,6 +104,16 @@ export default class Visualization extends Component {
     updateObjectRotation(x, y, z) {
         this.object.rotation.set(x, y, z)
         this.renderScene()
+    }
+
+    /* Update the amount of ring highlight based on the rotations */
+    updateRingHighlights(x, y, z) {
+        const rot = [x, y, z]
+        this.rings.forEach((r, i) => {
+            let geo = ringHighlightGeometry(r.children[0].geometry, rot[i])
+            this.ringHighlights[i].geometry = geo
+            this.renderScene()
+        })
     }
 
     /* Generate Axes For The Object */
@@ -189,6 +205,24 @@ export default class Visualization extends Component {
         }
     
         return rings
+    }
+
+    generateProtractorRingHighlights(rings) {
+        let highlights = []
+        rings.forEach((r, i) => {
+            let geo = ringHighlightGeometry(r.children[0].geometry, 0)
+            let mat = new THREE.MeshBasicMaterial({
+                color: COLORS[i], 
+                side: THREE.DoubleSide
+            })
+            let highlight = new THREE.Mesh(geo, mat)
+            highlight.rotation.fromArray(r.children[0].rotation.toArray())
+            highlight.material.polygonOffset = true
+            highlight.material.polygonOffsetFactor = 2
+            highlight.material.polygonOffsetUnits = 2
+            highlights.push(highlight)
+        })
+        return highlights
     }
     
     /* Resize the WebGL scene when the user resizes the window */
